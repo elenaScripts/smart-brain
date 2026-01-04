@@ -183,19 +183,10 @@ class App extends Component {
         return response.json();
       })
       .then(data => {
-        // Update entries count (keeping your logic)
-        if (data.entries !== undefined) {
-          this.setState({
-            user: {
-              ...this.state.user,
-              entries: data.entries
-            }
-          });
-        }
-        
         // Use the face detection result (could be nested in data or be data itself)
         const result = data.result || data;
         console.log('Full API Response:', JSON.stringify(result, null, 2));
+        console.log('Entries data:', data.entries);
         
         // Check for API errors
         if (result.status && result.status.code !== 10000) {
@@ -213,6 +204,17 @@ class App extends Component {
         if (result.outputs && result.outputs[0] && result.outputs[0].data && result.outputs[0].data.regions) {
           const regions = result.outputs[0].data.regions;
           console.log('Found', regions.length, 'face(s)');
+          
+          // Update entries count only after successful face detection
+          if (data.entries !== undefined) {
+            this.setState(prevState => ({
+              user: {
+                ...prevState.user,
+                entries: data.entries
+              }
+            }));
+            console.log('Updated entries to:', data.entries);
+          }
           
           // Wait for image to load before calculating position
           const image = document.getElementById('inputimage');
