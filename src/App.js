@@ -102,7 +102,7 @@ class App extends Component {
       email: data.email,
       id: data.id,
       name: data.name,
-      entries: data.entries,
+      entries: Number(data.entries) || 0,
       joined: data.joined,
     }})
   }
@@ -191,23 +191,28 @@ class App extends Component {
         // Update entries count from backend (backend should update database and return new count)
         if (data.entries !== undefined && data.entries !== null) {
           // Backend has updated the database and returned the new count
+          // Ensure it's a number (database might return string)
+          const newEntries = Number(data.entries) || 0;
           this.setState(prevState => ({
             user: {
               ...prevState.user,
-              entries: data.entries
+              entries: newEntries
             }
           }));
-          console.log('Updated entries count from database:', data.entries);
+          console.log('Updated entries count from database:', newEntries);
         } else {
           // Fallback: increment locally if backend didn't return entries
           // This should not happen if backend is working correctly
           console.warn('Backend did not return entries count. Incrementing locally as fallback.');
-          this.setState(prevState => ({
-            user: {
-              ...prevState.user,
-              entries: (prevState.user.entries || 0) + 1
-            }
-          }));
+          this.setState(prevState => {
+            const currentEntries = Number(prevState.user.entries) || 0;
+            return {
+              user: {
+                ...prevState.user,
+                entries: currentEntries + 1
+              }
+            };
+          });
         }
         
         // Check for API errors
