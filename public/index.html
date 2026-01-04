@@ -28,6 +28,17 @@
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
+    <script>
+      // Polyfill for process (needed for Clarifai SDK in browser)
+      if (typeof process === 'undefined') {
+        window.process = {
+          env: {
+            NODE_ENV: 'development'
+          },
+          browser: true
+        };
+      }
+    </script>
     <div id="root"></div>
     <!--
       This HTML file is a template.
