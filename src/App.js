@@ -186,7 +186,29 @@ class App extends Component {
         // Use the face detection result (could be nested in data or be data itself)
         const result = data.result || data;
         console.log('Full API Response:', JSON.stringify(result, null, 2));
-        console.log('Entries data:', data.entries);
+        console.log('Entries from backend:', data.entries);
+        
+        // Update entries count from backend (backend should update database and return new count)
+        if (data.entries !== undefined && data.entries !== null) {
+          // Backend has updated the database and returned the new count
+          this.setState(prevState => ({
+            user: {
+              ...prevState.user,
+              entries: data.entries
+            }
+          }));
+          console.log('Updated entries count from database:', data.entries);
+        } else {
+          // Fallback: increment locally if backend didn't return entries
+          // This should not happen if backend is working correctly
+          console.warn('Backend did not return entries count. Incrementing locally as fallback.');
+          this.setState(prevState => ({
+            user: {
+              ...prevState.user,
+              entries: (prevState.user.entries || 0) + 1
+            }
+          }));
+        }
         
         // Check for API errors
         if (result.status && result.status.code !== 10000) {
@@ -204,17 +226,6 @@ class App extends Component {
         if (result.outputs && result.outputs[0] && result.outputs[0].data && result.outputs[0].data.regions) {
           const regions = result.outputs[0].data.regions;
           console.log('Found', regions.length, 'face(s)');
-          
-          // Update entries count only after successful face detection
-          if (data.entries !== undefined) {
-            this.setState(prevState => ({
-              user: {
-                ...prevState.user,
-                entries: data.entries
-              }
-            }));
-            console.log('Updated entries to:', data.entries);
-          }
           
           // Wait for image to load before calculating position
           const image = document.getElementById('inputimage');
